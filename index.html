@@ -17,20 +17,20 @@
             display: flex;
             width: 80%;
             border: 1px solid #ccc;
-            height: 80%; /* 固定頁面高度 */
+            height: 80%;
         }
         .places {
             width: 30%;
             padding: 20px;
             background-color: #f0f0f0;
             display: flex;
-            flex-direction: column; /* 垂直排列子元素 */
-            overflow-y: auto; /* 增加垂直滾動條 */
-            max-height: 100%; /* 限制高度，讓滾動條生效 */
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: 100%;
         }
         .places-buttons {
             display: flex;
-            flex-wrap: wrap; /* 允許按鈕換行 */
+            flex-wrap: wrap;
         }
         .places-buttons button {
             margin: 5px;
@@ -41,8 +41,8 @@
         .input-container {
             display: flex;
             margin-top: 10px;
-            width: 100%; /* 讓自定義輸入框占據整行寬度 */
-            flex-shrink: 0; /* 防止縮小 */
+            width: 100%;
+            flex-shrink: 0;
         }
         .display {
             width: 40%;
@@ -61,9 +61,9 @@
             padding: 20px;
             background-color: #e8f4fa;
             border-right: 1px solid #ccc;
-            overflow-y: auto; /* 增加滾動條 */
-            max-height: 100%; /* 限制高度，讓滾動條生效 */
-            text-align: center; /* 使內容居中 */
+            overflow-y: auto;
+            max-height: 100%;
+            text-align: center;
         }
         .disabled {
             background-color: #cccccc;
@@ -75,10 +75,10 @@
             margin-bottom: 20px;
         }
         .controls button {
-            margin-right: 10px; /* 增加按鈕間距 */
+            margin-right: 10px;
         }
         #scrollToTop {
-            display: none; /* 初始隱藏回到頂部按鈕 */
+            display: none;
             position: fixed;
             bottom: 20px;
             right: 30px;
@@ -113,19 +113,15 @@
             <button onclick="document.getElementById('fileInput').click()">匯入txt</button>
         </div>
         
-        <!-- 新增城市分類按鈕 -->
         <div class="places-buttons">
             <button onclick="showPlaces('osaka')">大阪</button>
             <button onclick="showPlaces('tokyo')">東京</button>
             <button onclick="showPlaces('hokkaido')">北海道</button>
         </div>
 
-        <!-- 旅遊景點按鈕 -->
         <div class="places-buttons" id="placesButtonsContainer">
-            <!-- 大阪的景點 -->
         </div>
 
-        <!-- 自訂義景點輸入 -->
         <div class="input-container" id="customPlaceInputContainer">
             <input type="text" id="customPlaceInput" placeholder="請輸入文字">
             <button onclick="addCustomPlace()">新增</button>
@@ -137,11 +133,10 @@
 
 <script>
     let selectedPlaces = [];
-    let savedSelections = [];
-    let currentCity = ''; // 追蹤當前城市
-    let customPlaces = { osaka: [], tokyo: [], hokkaido: [] }; // 儲存每個城市的自定義景點
+    let savedSelections = JSON.parse(localStorage.getItem('savedSelections')) || []; // 從LocalStorage加載保存的選擇
+    let currentCity = ''; 
+    let customPlaces = JSON.parse(localStorage.getItem('customPlaces')) || { osaka: [], tokyo: [], hokkaido: [] }; // 儲存每個城市的自定義景點
 
-    // 定義各城市的景點
     const places = {
         osaka: ['黑門市場', '心齋橋', '道頓堀', '環球影城', '美國村', '大阪城', '天保山海遊館', '天王寺動物園', '通天閣新世界', '奈良鹿公園', '東大寺'],
         tokyo: ['淺草寺', '秋葉原', '東京塔', '迪士尼樂園', '澀谷交叉口'],
@@ -149,11 +144,10 @@
     };
 
     function showPlaces(city) {
-        selectedPlaces = []; // 清空選擇的景點
+        selectedPlaces = [];
         const placesButtonsContainer = document.getElementById('placesButtonsContainer');
-        placesButtonsContainer.innerHTML = ''; // 清空按鈕容器
+        placesButtonsContainer.innerHTML = '';
 
-        // 顯示預設景點
         places[city].forEach(place => {
             const button = document.createElement('button');
             button.textContent = place;
@@ -161,7 +155,6 @@
             placesButtonsContainer.appendChild(button);
         });
 
-        // 顯示自定義景點
         customPlaces[city].forEach(customPlace => {
             const button = document.createElement('button');
             button.textContent = customPlace;
@@ -169,10 +162,9 @@
             placesButtonsContainer.appendChild(button);
         });
 
-        // 確保自定義輸入框總是顯示
         const customPlaceInputContainer = document.getElementById('customPlaceInputContainer');
-        customPlaceInputContainer.style.display = 'flex'; // 確保自定義輸入框顯示
-        currentCity = city; // 設定當前城市
+        customPlaceInputContainer.style.display = 'flex';
+        currentCity = city;
     }
 
     function showPlace(button, placeName) {
@@ -199,6 +191,7 @@
             const title = `第${currentDay}天`;
             const record = `${title}: ${selectedPlaces.join(', ')}`;
             savedSelections.push(record);
+            localStorage.setItem('savedSelections', JSON.stringify(savedSelections)); // 儲存到LocalStorage
             updateSavedRecordsDisplay();
             clearAll();
         }
@@ -217,6 +210,7 @@
     function deleteLastSaved() {
         if (savedSelections.length > 0) {
             savedSelections.pop();
+            localStorage.setItem('savedSelections', JSON.stringify(savedSelections)); // 更新LocalStorage
             updateSavedRecordsDisplay();
         }
     }
@@ -235,6 +229,7 @@
         reader.onload = function(e) {
             const contents = e.target.result.split('\n');
             savedSelections = contents.filter(record => record);
+            localStorage.setItem('savedSelections', JSON.stringify(savedSelections)); // 儲存進LocalStorage
             updateSavedRecordsDisplay();
         };
         reader.readAsText(file);
@@ -244,34 +239,29 @@
         const customPlaceInput = document.getElementById('customPlaceInput');
         const customPlace = customPlaceInput.value.trim();
         if (customPlace && currentCity) {
-            customPlaces[currentCity].push(customPlace); // 將自定義景點加入對應城市的陣列
-            const button = document.createElement('button');
-            button.textContent = customPlace;
-            button.onclick = function() { showPlace(this, customPlace); };
-            document.getElementById('placesButtonsContainer').appendChild(button);
+            customPlaces[currentCity].push(customPlace); // 將自定義景點添加到當前城市
+            localStorage.setItem('customPlaces', JSON.stringify(customPlaces)); // 保存自定義景點到LocalStorage
             customPlaceInput.value = '';
+            showPlaces(currentCity);
         }
     }
 
-    // 滾動到頂部按鈕的顯示和功能
+    function scrollToTop() {
+        document.documentElement.scrollTop = 0;
+    }
+
     window.onscroll = function() {
-        const button = document.getElementById("scrollToTop");
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-            button.style.display = "block"; // 顯示回到頂部按鈕
+        const scrollToTopButton = document.getElementById('scrollToTop');
+        if (document.documentElement.scrollTop > 200) {
+            scrollToTopButton.style.display = 'block';
         } else {
-            button.style.display = "none"; // 隱藏按鈕
+            scrollToTopButton.style.display = 'none';
         }
     };
 
-    function scrollToTop() {
-        document.body.scrollTop = 0; // 為 Safari
-        document.documentElement.scrollTop = 0; // 為 Chrome, Firefox, IE 和 Opera
-    }
+    updateSavedRecordsDisplay(); // 初始載入保存的選擇
 </script>
 
 </body>
 </html>
 
-
-</body>
-</html>
